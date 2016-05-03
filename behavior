@@ -1,0 +1,87 @@
+$(document).ready(function() {
+	console.log('footer!');
+	// clear any existing form data
+
+	// add the error div
+	$('#element-10').prepend('<div id="error-text"></div>');
+
+	$('.form-input').on('input', function() {
+	var userInput = $('.form-input').val();
+	userInput = userInput.toLowerCase().replace(' ', '-').replace('\n', '');
+	$('.form-input').val(userInput);
+	});
+
+	/*clearForm();
+	console.log('form cleared');*/
+
+	$('.submit-button').click(function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		console.log('made request');
+
+		if (validateInput()){
+			makeRequest();
+		} else {
+			$("#error-text").html("Invalid username. Please use letters only without any numbers or special characters (e.g. 2, #, @, etc.)");
+		}
+	});
+	
+})
+
+function makeRequest() {
+	var userHandle = $('.form-input').val();
+
+	var request = {handle: userHandle};
+
+	var result = $.ajax({
+		url: "https://your_company_api/v0/messages/o/checkHandleAvailability", // or equivalant URL for making API call
+		data: JSON.stringify(request),
+		//dataType: "json",
+		contentType: "application/json",
+		type: "POST",
+	})
+	.done(function(result) {
+			// redirect to success page if handle is available
+		if (result.success === true && result.available === true) {
+			window.location.href = 'http://success_page_url';
+		} else if (result.success === true && result.available === false) {
+			// for successful request but unavailable username
+			$("#error-text").html("Oops! That username's unavailable. Please try again!");
+			/*
+			var errorCode =
+				"<div class=\"errors\">" +
+					"<span class=\"error-text\" id=\"username-unavailable\">" +
+						"Oops! That username's unavailable. Please try again!" +
+					"</span>" +
+				"</div>";
+
+			$(".widget-form").prepend(errorCode);
+			*/
+		}
+	});
+}
+
+
+/*function loadUserHandle() {
+	var input = $('.form-input').val();
+
+	if (validateInput(input) === true) {
+		// load userHandle into data for AJAX request and return
+		return input;
+	} else {
+		injectErrorCode();
+	}
+}*/
+
+function validateInput() {
+	var input = $('.form-input').val();
+	var regex = new RegExp('^[a-z-]{4,32}$');
+
+	if (input === undefined || input === null || input === '') {
+		return false;
+	} else if (regex.test(input) === false) {
+		return false;
+	} else {
+		return true;
+	}
+}
